@@ -14,7 +14,7 @@
       <input type="date" v-model="date" class="form-control">
       <input type="number" v-model="days" placeholder="0" min="0" class="form-control">
       <input type="text" v-model="country" placeholder="US" class="form-control">
-      <button type="button" class="btn btn-primary">Render</button>
+      <button type="button" v-on:click="render()" class="btn btn-primary">Render</button>
     </form>
     <div v-if="!loading" class="well margin-top">
       <div class="row">
@@ -25,7 +25,7 @@
             </div>
             <table class="table table-bordered">
               <thead>
-                <tr class="text-center active">
+                <tr class="text-center  active">
                   <td>S</td>
                   <td>M</td>
                   <td>T</td>
@@ -36,8 +36,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="week in month.weeks" class="text-center">
-                  <td v-for="day in week">{{ day.day}}</td>
+                <tr v-for="week in month.weeks" class="text-white text-center">
+                  <td v-for="day in week"
+                    :class="day.class">
+                    {{ (!day.is_invalid) ? day.day :''}}
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -5,15 +5,19 @@
   margin-top: 50px;
 }
 .orange {
+  color: #fff;
   background-color: #ffa500;
 }
 .yellow {
+  color: #fff;
   background-color: #ff0;
 }
 .green {
+  color: #fff;
   background-color: #008000;
 }
 .gray {
+  color: #fff;
   background-color: #808080;
 }
 #app {
