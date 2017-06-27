@@ -9,7 +9,6 @@
   background-color: #ffa500;
 }
 .yellow {
-  color: #fff;
   background-color: #ff0;
 }
 .green {
@@ -22,4 +21,7 @@
 }
 #app {
   margin-top: 100px;
+}
+td {
+  height: 40px;
 }

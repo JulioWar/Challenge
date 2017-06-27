@@ -8,7 +8,7 @@ let app = new Vue({
       loading: false,
       date: '',
       days: 0,
-      country: '',
+      country: 'US',
       holydays: {},
       data: [],
       months: [
@@ -29,42 +29,31 @@ let app = new Vue({
     },
     render() {
       this.data = [];
-      let day = this.date.split('-');
-      let today = new Date(day[0],Number(day[1]),Number(day[2]));
+      let today = moment(this.date);
       let days = Number(this.days);
 
-      let init_day = new Date(today);
-      init_day.setDate(init_day.getDate() - init_day.getDay());
+      let init_day = moment(this.date);
+      init_day.add(-Number(today.format('e')),'days');
 
-      let last_day = new Date(today)
-      last_day.setDate(last_day.getDate() + days);
+      let last_day = moment(today.format('YYYY-MM-DD'))
+      last_day.add(days,'days');
 
-      let end_day = new Date(last_day)
-      let last_saturday = 6 - end_day.getDay();
-      console.log(end_day.getDay(), last_saturday)
-      end_day.setDate(end_day.getDate() + last_saturday);
-
-
-      console.log(
-        this.getDateFormated(init_day),
-        this.getDateFormated(today),
-        this.getDateFormated(last_day),
-        this.getDateFormated(end_day)
-      );
+      let end_day = moment(last_day.format('YYYY-MM-DD'))
+      let last_saturday = 6 - Number(end_day.format('e'));
+      end_day.add(last_saturday,'days')
 
 
       this.loading = true;
       this.$http.get('https://holidayapi.com/v1/holidays', {
           params: {
             key: '3da6bb9f-0788-489e-9795-17432560e47e',
-            year: today.getFullYear(),
+            year: today.format('YYYY'),
             country: this.country
           }
         })
         .then(
           (res) => {
             this.holydays = res.body.holidays;
-            console.log(this.holydays)
             this.loading = false;
 
 
@@ -72,11 +61,11 @@ let app = new Vue({
             let current_month = null;
             let cssClass = '';
 
-            for (var d = new Date(init_day); d <= end_day; d.setDate(d.getDate() + 1)) {
+            for (var d = moment(init_day.format('YYYY-MM-DD')); d <= end_day; d.add(1,'days')) {
 
-              let uniqueMonth = this.months[d.getMonth()] + " " + d.getFullYear();
+              let uniqueMonth = d.format('MMMM YYYY');
 
-              if(month !== uniqueMonth && d.getDay()) {
+              if(month !== uniqueMonth && d.format('e') == 0) {
                 this.data.push({
                   month: uniqueMonth,
                   weeks: []
@@ -87,36 +76,36 @@ let app = new Vue({
                 current_month = this.data.filter((item) => {
                   return item.month === uniqueMonth
                 })[0];
+                if(!current_month) {
+                  current_month = this.data[this.data.length - 1];
+                }
               }
 
-              let holydaysResult = this.holydays.hasOwnProperty(this.getDateFormated(d));
-              console.log(holydaysResult)
+              let holydaysResult = this.holydays.hasOwnProperty(d.format('YYYY-MM-DD'));
 
-              let is_weekend = (d.getDay() === 0 || d.getDay() === 6);
-              let is_invalid = (d < today || d >= last_day);
+              let is_weekend = (d.format('e') == 0 || d.format('e') == 6);
+              let is_invalid = (d < today || d >= last_day) || d.format('MMMM YYYY') !== uniqueMonth;
+
 
               if (is_invalid) {
-                 cssClass = 'gray'
+                 cssClass = 'gray';
               } else if (holydaysResult) {
-                cssClass = 'orange'
+                cssClass = 'orange';
               } else if (is_weekend) {
-                cssClass = 'yellow'
-              } else (
-                cssClass = 'green'
-              )
+                cssClass = 'yellow';
+              } else {
+                cssClass = 'green';
+              }
 
 
-              if (d.getDay() === 0 ) {
+              if (d.format('e') == 0  || current_month.weeks.length ==0) {
                 current_month.weeks.push([]);
               }
 
               let current_week = current_month.weeks[current_month.weeks.length - 1]
 
-              if(!current_week) {
-                console.log(current_week,current_month);
-              }
               current_week.push({
-                day: d.getDate(),
+                day: d.format('D'),
                 is_invalid: is_invalid,
                 class:cssClass
               });
@@ -124,8 +113,6 @@ let app = new Vue({
 
 
             }
-
-            console.log(this.data);
 
           },
           () => {
